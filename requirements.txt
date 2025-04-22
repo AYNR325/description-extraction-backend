@@ -1,0 +1,10 @@
+flask
+opencv-python-headless
+numpy
+google-generativeai
+pillow
+pytesseract
+gtts
+pygame
+gunicorn
+flask_cors
