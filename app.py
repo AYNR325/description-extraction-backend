@@ -16,7 +16,8 @@ CORS(app)
 # app.secret_key = "your_secret_key_here"  # Replace with a secure random key in production
 
 # Configure Google Gemini API
-GEMINI_API_KEY = "AIzaSyClwx3CyenZMAk5m9WqSw4_5ERuzXR7DCI"
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+
 genai.configure(api_key=GEMINI_API_KEY)
 
 SUPPORTED_LANGUAGES = {
@@ -54,9 +55,31 @@ def extract_text_from_image(image, lang):
     text = pytesseract.image_to_string(image_pil, lang=tesseract_lang)
     return text.strip() if text else "No text detected."
 
+# def describe_image(image, lang):
+#     """Use Google's Gemini API to generate a detailed description of an image in the specified language."""
+#     model = genai.GenerativeModel("gemini-1.5-flash")
+#     image_pil = Image.fromarray(image)
+
+#     img_byte_arr = io.BytesIO()
+#     image_pil.save(img_byte_arr, format='PNG')
+#     img_byte_arr = img_byte_arr.getvalue()
+
+#     lang_name = LANGUAGE_NAMES.get(lang, "English")
+#     prompt_text = f"Describe this image in 8-9 sentences in {lang_name}."
+
+#     response = model.generate_content([
+#         {"text": prompt_text},
+#         {"inline_data": {"mime_type": "image/png", "data": base64.b64encode(img_byte_arr).decode('utf-8')}}
+#     ], stream=False)
+
+#     return response.text if response and hasattr(response, 'text') else "Could not generate description."
+
 def describe_image(image, lang):
     """Use Google's Gemini API to generate a detailed description of an image in the specified language."""
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    
+    # FIXED MODEL NAME
+    model = genai.GenerativeModel("gemini-1.5-flash-001")
+    
     image_pil = Image.fromarray(image)
 
     img_byte_arr = io.BytesIO()
@@ -72,6 +95,7 @@ def describe_image(image, lang):
     ], stream=False)
 
     return response.text if response and hasattr(response, 'text') else "Could not generate description."
+
 
 def generate_speech(text, lang):
     """Convert text to speech in the specified language and return as an audio file (MP3)."""
