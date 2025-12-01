@@ -20,6 +20,8 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 genai.configure(api_key=GEMINI_API_KEY)
 
+vision_model = genai.GenerativeModel("models/gemini-2.5-flash-image")
+
 SUPPORTED_LANGUAGES = {
     "en": "eng",
     "hi": "hin",
@@ -74,11 +76,31 @@ def extract_text_from_image(image, lang):
 
 #     return response.text if response and hasattr(response, 'text') else "Could not generate description."
 
+# def describe_image(image, lang):
+#     """Use Google's Gemini API to generate a detailed description of an image in the specified language."""
+    
+#     # FIXED MODEL NAME
+#     model = genai.GenerativeModel("models/gemini-2.5-flash-image")
+    
+#     image_pil = Image.fromarray(image)
+
+#     img_byte_arr = io.BytesIO()
+#     image_pil.save(img_byte_arr, format='PNG')
+#     img_byte_arr = img_byte_arr.getvalue()
+
+#     lang_name = LANGUAGE_NAMES.get(lang, "English")
+#     prompt_text = f"Describe this image in 8-9 sentences in {lang_name}."
+
+#     response = model.generate_content([
+#         {"text": prompt_text},
+#         {"inline_data": {"mime_type": "image/png", "data": base64.b64encode(img_byte_arr).decode('utf-8')}}
+#     ], stream=False)
+
+#     return response.text if response and hasattr(response, 'text') else "Could not generate description."
+
+
 def describe_image(image, lang):
     """Use Google's Gemini API to generate a detailed description of an image in the specified language."""
-    
-    # FIXED MODEL NAME
-    model = genai.GenerativeModel("gemini-1.5-flash-001")
     
     image_pil = Image.fromarray(image)
 
@@ -89,10 +111,15 @@ def describe_image(image, lang):
     lang_name = LANGUAGE_NAMES.get(lang, "English")
     prompt_text = f"Describe this image in 8-9 sentences in {lang_name}."
 
-    response = model.generate_content([
+    response = vision_model.generate_content([
         {"text": prompt_text},
-        {"inline_data": {"mime_type": "image/png", "data": base64.b64encode(img_byte_arr).decode('utf-8')}}
-    ], stream=False)
+        {
+            "inline_data": {
+                "mime_type": "image/png",
+                "data": base64.b64encode(img_byte_arr).decode('utf-8')
+            }
+        }
+    ])
 
     return response.text if response and hasattr(response, 'text') else "Could not generate description."
 
